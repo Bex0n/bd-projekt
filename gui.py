@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from mysql import *
 
 # Message function
 def show_msg():
@@ -23,8 +24,8 @@ class GUITemplate(object):
         self.canvasHistory.configure(bg="#adb9d1")
         self.canvasStocks.bind('<Configure>', lambda e: self.canvasStocks.configure(scrollregion = self.canvasStocks.bbox('all')))
         self.canvasHistory.bind('<Configure>', lambda e: self.canvasHistory.configure(scrollregion = self.canvasHistory.bbox('all')))
-        self.frameStocks = Frame(self.canvasStocks)
-        self.frameHistory = Frame(self.canvasHistory)
+        self.frameStocks = Frame(self.canvasStocks, bg="#adb9d1")
+        self.frameHistory = Frame(self.canvasHistory, bg="#adb9d1")
         self.canvasStocks.create_window((0, 0), window=self.frameStocks, anchor="nw")
         self.canvasHistory.create_window((0, 0), window=self.frameHistory, anchor="nw")
 
@@ -81,10 +82,10 @@ class GUITemplate(object):
 
     def addButtons(self):
         # Adding buttons
-        for i in range(50):
+        for i in range(12):
             btn = Button(self.frameStocks, text="Przycisk " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3")
-            btn['command'] = lambda b=btn: b.pack_forget()
-            btn.pack(side=TOP, fill="x")
+            btn['command'] = (lambda b=btn: b.destroy())
+            btn.pack(side=TOP, fill='x')
             Button(self.frameHistory, text="Test " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3", command=show_msg).pack(side=TOP, fill="x")
 
     def clearHistory(self):
