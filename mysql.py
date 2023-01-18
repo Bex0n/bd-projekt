@@ -1,9 +1,12 @@
 import pymysql
 
+# mysql -u root -p
+# haslo: root
+
 class stockDatabase(object):
 
     def __init__(self):
-        self.chuj = 1
+        pass
 
     def connect(self):
         self.conn = pymysql.connect(
@@ -22,5 +25,10 @@ class stockDatabase(object):
     
     def fetch(self):
         return self.cursor.fetchall()
+
+    def getLatestDate(self, companyName):
+        self.execute("SELECT * FROM STOCKS WHERE name = " + companyName)
+        return self.fetch()
+        
 
     

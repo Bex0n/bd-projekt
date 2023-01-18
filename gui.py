@@ -2,12 +2,20 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from mysql import *
+from mysql import stockDatabase
 
 # Message function
 def show_msg():
     messagebox.showinfo("Eror", "Pomocy, zostalem uwieziony")
 
+def callback(eventObject):
+    print("Selected")
+
 class GUITemplate(object):
+
+    def updateCompany(self):
+        self.companyName.configure(text=self.choosebox.get())
+        self.companyUpdateDate.configure(text="Latest update: " + self.database.getLatestDate(self.choosebox.get()))
 
     def __init_left_panel_scrollbars(self):
         self.canvasStocks = Canvas(self.wrapperStocks, height=335)
@@ -34,10 +42,17 @@ class GUITemplate(object):
         self.variable = StringVar(self.wrapperCompany)
         self.variable.set(' - ')
         self.choosebox = ttk.Combobox(self.wrapperCompany, values = self.choices)
+        self.choosebox.bind("<<ComboboxSelected>>", lambda eventObject : self.updateCompany())
         self.choosebox.current(0)
         self.choosebox.pack(side=LEFT, fill="x", expand="yes", padx=10, pady=0)
-        self.updatebutton = Button(self.wrapperCompany, text="Update", fg = "white", font = "Kokila", bg="#5b74a3", command=show_msg)
+        self.updatebutton = Button(self.wrapperCompany, text="Update", fg = "white", font = "Kokila", bg="#5b74a3", command=self.updateCompany)
         self.updatebutton.pack(side=TOP, fill="x", expand="yes", padx=100, pady=0)
+
+    def __init_right_panel_data_panel__(self):
+        self.companyName = Label(self.wrapperData, text="-", bg='white', height=2)
+        self.companyName.pack(anchor=NW, fill='x')
+        self.companyUpdateDate = Label(self.wrapperData, text="-", bg='white', height=2, width=50)
+        self.companyUpdateDate.pack(anchor=NW)
 
     def __init_left_panel__(self):
         self.wrapperStocks = LabelFrame(self.wrapperLeft, height=335)
@@ -52,12 +67,13 @@ class GUITemplate(object):
         self.wrapperCompany = LabelFrame(self.wrapperRight, height=75, borderwidth=0, highlightthickness=0)
         self.wrapperData = LabelFrame(self.wrapperRight, height=450)
         self.wrapperAddStock = LabelFrame(self.wrapperRight, height=250, borderwidth=0, highlightthickness=0)
-        self.wrapperCompany.pack(side=TOP, fill="both", expand="yes")
+        self.wrapperCompany.pack(side=TOP, fill="x", expand="no")
         self.wrapperData.pack(fill="both", expand="yes")
-        self.wrapperAddStock.pack(side=BOTTOM, fill="both", expand="yes")
+        self.wrapperAddStock.pack(side=BOTTOM, fill="both", expand="no")
         self.wrapperCompany.configure(bg='lightsteelblue')
         self.wrapperData.configure(bg='lightsteelblue')
         self.wrapperAddStock.configure(bg='lightsteelblue')
+        self.__init_right_panel_data_panel__()
         self.__init_right_panel_company_choose__()
 
     def __init_panels__(self):
@@ -78,6 +94,8 @@ class GUITemplate(object):
         self.__init_panels__()
 
     def __init__(self):
+        self.database = stockDatabase()
+        self.database.connect()
         self.__init_window__()
 
     def addButtons(self):
