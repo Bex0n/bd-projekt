@@ -12,5 +12,3 @@ def download(date1, date2, company):
 
 def downloadLastMonth(company):
     download(dt.now() - relativedelta(months=1), dt.now(), company)
-
-downloadLastMonth("NVDA")

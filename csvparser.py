@@ -5,6 +5,5 @@ def parseData(company):
         line = line.replace("\n", "")
         line = line.split(',')
         output.append(line)
+    output.pop(0)
     return output    
-
-# print(parseData("NVDA"))

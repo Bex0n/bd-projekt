@@ -1,8 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
-from mysql import *
 from mysql import stockDatabase
+import mysql
 
 # Message function
 def show_msg():
@@ -13,9 +13,17 @@ def callback(eventObject):
 
 class GUITemplate(object):
 
-    def updateCompany(self):
+    def updateVisualData(self):
         self.companyName.configure(text=self.choosebox.get())
-        self.companyUpdateDate.configure(text="Latest update: " + self.database.getLatestDate(self.choosebox.get()))
+        self.companyUpdateDate.configure(text="Last update: " + self.database.getLastDate(self.choosebox.get()))
+        self.clearStocks()
+        self.addOwnedStocks()
+        self.addHistoryStocks()
+        
+
+    def updateData(self):
+        self.database.updateLastMonth(self.choosebox.get())
+        self.updateVisualData()
 
     def __init_left_panel_scrollbars(self):
         self.canvasStocks = Canvas(self.wrapperStocks, height=335)
@@ -38,14 +46,14 @@ class GUITemplate(object):
         self.canvasHistory.create_window((0, 0), window=self.frameHistory, anchor="nw")
 
     def __init_right_panel_company_choose__(self):
-        self.choices = [' - ', 'NVIDIA', 'Tesla', 'SpaceX', 'Amazon']
+        self.choices = [' - ', 'NVIDIA', 'Tesla', 'Amazon']
         self.variable = StringVar(self.wrapperCompany)
         self.variable.set(' - ')
         self.choosebox = ttk.Combobox(self.wrapperCompany, values = self.choices)
-        self.choosebox.bind("<<ComboboxSelected>>", lambda eventObject : self.updateCompany())
+        self.choosebox.bind("<<ComboboxSelected>>", lambda eventObject : self.updateVisualData())
         self.choosebox.current(0)
         self.choosebox.pack(side=LEFT, fill="x", expand="yes", padx=10, pady=0)
-        self.updatebutton = Button(self.wrapperCompany, text="Update", fg = "white", font = "Kokila", bg="#5b74a3", command=self.updateCompany)
+        self.updatebutton = Button(self.wrapperCompany, text="Update", fg = "white", font = "Kokila", bg="#5b74a3", command=self.updateData)
         self.updatebutton.pack(side=TOP, fill="x", expand="yes", padx=100, pady=0)
 
     def __init_right_panel_data_panel__(self):
@@ -98,15 +106,20 @@ class GUITemplate(object):
         self.database.connect()
         self.__init_window__()
 
-    def addButtons(self):
-        # Adding buttons
-        for i in range(12):
+    def clearStocks(self):
+        for button in self.frameHistory.winfo_children():
+            button.destroy()
+        for button in self.frameStocks.winfo_children():
+            button.destroy()
+
+    def addOwnedStocks(self):
+        for i in range(5):
             btn = Button(self.frameStocks, text="Przycisk " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3")
             btn['command'] = (lambda b=btn: b.destroy())
             btn.pack(side=TOP, fill='x')
-            Button(self.frameHistory, text="Test " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3", command=show_msg).pack(side=TOP, fill="x")
 
-    def clearHistory(self):
-        for button in self.frameHistory.winfo_children():
-            button.destroy()
-        
+    def addHistoryStocks(self):
+        for i in range(5):
+            btn = Button(self.frameHistory, text="Test " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3", command=show_msg)
+            btn['command'] = show_msg
+            btn.pack(side=TOP, fill="x")
