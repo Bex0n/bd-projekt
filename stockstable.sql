@@ -10,6 +10,15 @@ CREATE TABLE stocks (
 );
 
 CREATE TABLE ownedstocks (
+	id INT PRIMARY KEY,
+	name VARCHAR(255),
+	date DATE,
+	open FLOAT,
+	volume INT
+);
+
+CREATE TABLE historystocks (
+	id INT PRIMARY KEY,
 	name VARCHAR(255),
 	date DATE,
 	open FLOAT,

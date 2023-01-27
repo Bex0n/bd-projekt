@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from mysql import stockDatabase
-import mysql
+import random
 
 # Message function
 def show_msg():
@@ -10,16 +10,6 @@ def show_msg():
 
 def callback(eventObject):
     print("Selected")
-
-def sell(self, ownedstock):
-        self.createHistoryStock(ownedstock)
-        ownedstock.forget()
-        self.clearStocks()
-        self.wrapperStocks.forget()
-        self.wrapperHistory.forget()
-        self.__init_left_panel__()
-        self.addOwnedStocks()
-        self.addHistoryStocks()
 
 class GUITemplate(object):
 
@@ -35,7 +25,9 @@ class GUITemplate(object):
         self.lowestDailyVolume.configure(text=self.database.getLowestVolume(self.choosebox.get()))
         self.highestDailyVolume.configure(text=self.database.getHighestVolume(self.choosebox.get()))
         self.clearStocks()
+        self.stocksInfo.forget()
         self.wrapperStocks.forget()
+        self.historyInfo.forget()
         self.wrapperHistory.forget()
         self.__init_left_panel__()
         self.addOwnedStocks()
@@ -159,9 +151,13 @@ class GUITemplate(object):
         self.addStock.pack(fill='both', expand='yes')
 
     def __init_left_panel__(self):
+        self.stocksInfo = Label(self.wrapperLeft, anchor=N, text="Owned stocks", height=1)
         self.wrapperStocks = LabelFrame(self.wrapperLeft, height=335)
+        self.historyInfo = Label(self.wrapperLeft, anchor=N, text="History", height=1)
         self.wrapperHistory = LabelFrame(self.wrapperLeft, height=335)
+        self.stocksInfo.pack()
         self.wrapperStocks.pack(side=TOP, fill="both", expand="yes")
+        self.historyInfo.pack()
         self.wrapperHistory.pack(side=BOTTOM, fill="both", expand="yes")
         self.wrapperStocks.configure(bg='lightsteelblue')
         self.wrapperHistory.configure(bg='lightsteelblue')
@@ -209,39 +205,107 @@ class GUITemplate(object):
         for button in self.frameStocks.winfo_children():
             button.destroy()
 
+    def sell(self, ownedstock):
+        self.createHistoryStock(ownedstock)
+        ownedstock.forget()
+        ownedstock.destroy()
+        self.database.deleteOwnedStock(ownedstock.id)
+        self.clearStocks()
+        self.stocksInfo.forget()
+        self.wrapperStocks.forget()
+        self.historyInfo.forget()
+        self.wrapperHistory.forget()
+        self.__init_left_panel__()
+        self.addOwnedStocks()
+        self.addHistoryStocks()
+
+    def deleteHistory(self, historystock):
+        historystock.forget()
+        historystock.destroy()
+        self.database.deleteHistoryStock(historystock.id)
+        self.clearStocks()
+        self.stocksInfo.forget()
+        self.wrapperStocks.forget()
+        self.historyInfo.forget()
+        self.wrapperHistory.forget()
+        self.__init_left_panel__()
+        self.addOwnedStocks()
+        self.addHistoryStocks()    
+
     def createHistoryStock(sekf, ownedstock):
         pass
 
-    def createOwnedStockLabel(self):
-        label = Label(self.frameStocks, bg="#5b74a3", text='Test')
-        labelleft = Label(label, bg='white', height=7)
-        labelright = Label(label, bg='white', height=7)
+    def createOwnedStockLabel(self, data):
+        label = Label(self.frameStocks, bg="#5b74a3")
+        label.id = data[0]
+        label.labelleft = Label(label, bg='white', height=7)
+        label.labelright = Label(label, bg='white', height=7)
         label.pack(side=TOP, fill='x', expand='yes')
-        labelleft.pack(side=LEFT)
-        labelright.pack(side=LEFT)
+        label.labelleft.pack(side=LEFT)
+        label.labelright.pack(side=LEFT)
 
-        earnings = Label(labelright, bg='green', text='+1.23$', font=('Kokilla', 16))
-        roe = Label(labelright, bg='blue', text='+25.6%', width=23, height=1)
-        finish = Button(labelright, text="Sell", fg='white', font='Kokilla', command=lambda e: sell(self, label))
-        earnings.pack()
-        roe.pack()
-        finish.pack()
+        earning = round((self.database.getLastPrice(self.choosebox.get()) - data[3]) * data[4], 2)
+        roe = round(earning / (data[3] * data[4]) * 100, 2)
+        if earning > 0:
+            earning = "+" + str(earning)
+            roe = "+" + str(roe)
+        else:
+            earning = str(earning)
+            roe = str(roe)
+        earning = earning + "$"
+        roe = roe + "%"
+        label.earnings = Label(label.labelright, bg='skyblue', text=earning, font=('Kokilla', 16))
+        label.roe = Label(label.labelright, bg='blue', text=roe, width=23, height=1)
+        label.finish = Button(label.labelright, text="Sell", fg='white', font='Kokilla', command=lambda : self.sell(label))
+        label.earnings.pack()
+        label.roe.pack()
+        label.finish.pack()
 
-        date = Label(labelleft, bg='red', anchor=W, text='Start date: 2023-01-23', width=23)
-        initialvalue = Label(labelleft, anchor=W, bg='yellow', text='Value: 15$')
-        volume = Label(labelleft, anchor=W, bg='red', text='Volumes: 15')
-        volumeprice = Label(labelleft, anchor=W, bg='blue', text='Price per volume: 1$')
-        date.pack(anchor=W)
-        initialvalue.pack(anchor=W)
-        volume.pack(anchor=W)
-        volumeprice.pack(anchor=W)
+        label.date = Label(label.labelleft, bg='red', anchor=W, text='Start date: ' + str(data[2]), width=23)
+        label.initialvalue = Label(label.labelleft, anchor=W, bg='yellow', text='Value: ' + str(data[3] * data[4]) + '$')
+        label.volume = Label(label.labelleft, anchor=W, bg='red', text='Volumes: ' + str(data[4]))
+        label.volumeprice = Label(label.labelleft, anchor=W, bg='blue', text='Price per volume: ' + str(data[3]) + '$')
+        label.date.pack(anchor=W)
+        label.initialvalue.pack(anchor=W)
+        label.volume.pack(anchor=W)
+        label.volumeprice.pack(anchor=W)
 
     def addOwnedStocks(self):
-        for i in range(5):
-            self.createOwnedStockLabel()
+        data = self.database.getOwnedStocks(self.choosebox.get())
+        for i in range(0, len(data)):
+            self.createOwnedStockLabel(data[i])
+
+    def createHistoryStockLabel(self, data):
+        label = Label(self.frameHistory, bg="#5b74a3")
+        label.id = data[0]
+        label.labelleft = Label(label, bg='white', height=7)
+        label.labelright = Label(label, bg='white', height=7)
+        label.pack(side=TOP, fill='x', expand='yes')
+        label.labelleft.pack(side=LEFT)
+        label.labelright.pack(side=LEFT)
+
+        earning = round((self.database.getLastPrice(self.choosebox.get()) - data[3]) * data[4], 2)
+        label.earnings = Label(label.labelright, bg='white', text=str(earning) + "$", font=('Kokilla', 16), pady=1)
+        if earning > 0:
+            label.earnings.configure(bg='green')
+        if earning < 0:
+            label.earnings.configure(bg='red')
+        label.earnings.pack()
+        label.roe = Label(label.labelright, bg='blue', width=23, height=1)
+        label.roe.pack()
+        label.finish = Button(label.labelright, text="Delete", fg='white', font='Kokilla', command=lambda : self.deleteHistory(label))
+        label.finish.pack()
+
+        label.date = Label(label.labelleft, bg='red', anchor=W, text='Start date: ' + str(data[2]), width=23)
+        label.initialvalue = Label(label.labelleft, anchor=W, bg='yellow', text='Value: ' + str(data[3] * data[4]) + '$')
+        label.volume = Label(label.labelleft, anchor=W, bg='red', text='Volumes: ' + str(data[4]))
+        label.volumeprice = Label(label.labelleft, anchor=W, bg='blue', text='Price per volume: ' + str(data[3]) + '$')
+        label.date.pack(anchor=W)
+        label.initialvalue.pack(anchor=W)
+        label.volume.pack(anchor=W)
+        label.volumeprice.pack(anchor=W)
 
     def addHistoryStocks(self):
-        for i in range(5):
-            btn = Button(self.frameHistory, text="Test " + str(i) + " ", fg = "white", font = "Kokila", bg="#5b74a3", command=show_msg)
-            btn['command'] = show_msg
-            btn.pack(side=TOP, fill="x")
+        data = self.database.getHistoryStocks(self.choosebox.get())
+        for i in range(0, len(data)):
+            self.createHistoryStockLabel(data[i])

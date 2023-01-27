@@ -43,6 +43,12 @@ class stockDatabase(object):
         self.execute("SELECT max(date) FROM stocks WHERE name = '" + companyName + "' ORDER BY date")
         data = self.fetch()
         return str(data[0][0])
+
+    def getLastPrice(self, companyName):
+        date = self.getLastDate(companyName)
+        self.execute("SELECT close FROM stocks WHERE name = '" + companyName + "' AND date = '" + date + "'")
+        data = self.fetch()
+        return data[0][0]
     
     def updateLastMonth(self, companyName):
         downloadLastMonth(convertName(companyName))
@@ -118,4 +124,32 @@ class stockDatabase(object):
         if (len(data) == 0 or data[0][0] == None):
             return '-'
         return str(data[0][0]) + " on " + str(data[0][1])
+
+    def getOwnedStocks(self, companyName):
+        self.execute("SELECT * FROM ownedstocks WHERE name = '" + companyName + "'")
+        data = self.fetch()
+        return data
+    
+    def deleteOwnedStock(self, id):
+        sql = "SELECT * FROM ownedstocks WHERE id = " + str(id)
+        print(sql)
+        self.execute(sql)
+        data = self.fetch()[0]
+        sqlinsert = "INSERT INTO historystocks (id, name, date, open, volume) VALUES (%s, %s, %s, %s, %s)"
+        val = (data[0], data[1], data[2], data[3], data[4])
+        self.cursor.execute(sqlinsert, val)
+        sqlremove = "DELETE FROM ownedstocks WHERE id = " + str(id)
+        self.execute(sqlremove)
+        self.conn.commit()
+    
+    def getHistoryStocks(self, companyName):
+        self.execute("SELECT * FROM historystocks WHERE name = '" + companyName + "'")
+        data = self.fetch()
+        return data
+
+    def deleteHistoryStock(self, id):
+        sqlremove = "DELETE FROM historystocks WHERE id = " + str(id)
+        self.execute(sqlremove)
+        self.conn.commit()
+
 
