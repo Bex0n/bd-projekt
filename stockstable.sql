@@ -8,3 +8,10 @@ CREATE TABLE stocks (
 	adjclose FLOAT,
 	volume INT
 );
+
+CREATE TABLE ownedstocks (
+	name VARCHAR(255),
+	date DATE,
+	open FLOAT,
+	volume INT
+);

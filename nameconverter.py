@@ -1,5 +1,5 @@
 arr = {}
-arr["-"] = ["-"]
+arr[" - "] = [" - "]
 arr["NVIDIA"] = ["NVDA"]
 arr["Amazon"] = ["AMZN"]
 arr["Tesla"] = ["TSLA"]
