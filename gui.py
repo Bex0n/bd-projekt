@@ -17,6 +17,9 @@ class GUITemplate(object):
         self.companyName.configure(text=self.choosebox.get())
         self.companyUpdateDate.configure(text="Last update: " + self.database.getLastDate(self.choosebox.get()))
         self.clearStocks()
+        self.wrapperStocks.forget()
+        self.wrapperHistory.forget()
+        self.__init_left_panel__()
         self.addOwnedStocks()
         self.addHistoryStocks()
         
@@ -57,10 +60,17 @@ class GUITemplate(object):
         self.updatebutton.pack(side=TOP, fill="x", expand="yes", padx=100, pady=0)
 
     def __init_right_panel_data_panel__(self):
-        self.companyName = Label(self.wrapperData, text="-", bg='white', height=2)
-        self.companyName.pack(anchor=NW, fill='x')
-        self.companyUpdateDate = Label(self.wrapperData, text="-", bg='white', height=2, width=50)
-        self.companyUpdateDate.pack(anchor=NW)
+        self.companyName = Label(self.wrapperData, text="-", font=("Roboto", 50), bg='white')
+        self.companyName.pack(anchor=N, fill='x')
+        self.companyLast = LabelFrame(self. wrapperData, bg='lightsteelblue', height=1)
+        self.companyLast.pack(anchor=N, fill='both')
+        self.companyData = LabelFrame(self.wrapperData, bg="red", height=50)
+        self.companyData.pack(anchor=N, fill='both', expand='yes')
+
+        self.companyUpdateDate = Label(self.companyLast, text="-", bg='white', height=2)
+        self.companyUpdateDate.pack(side=LEFT, fill='both', expand="yes")
+        self.companyLastChoosebox = Label(self.companyLast, text="-", bg="white")
+        self.companyLastChoosebox.pack(side=LEFT, fill="both", expand="yes")
 
     def __init_left_panel__(self):
         self.wrapperStocks = LabelFrame(self.wrapperLeft, height=335)
@@ -72,12 +82,12 @@ class GUITemplate(object):
         self.__init_left_panel_scrollbars()
 
     def __init_right_panel__(self):
-        self.wrapperCompany = LabelFrame(self.wrapperRight, height=75, borderwidth=0, highlightthickness=0)
+        self.wrapperCompany = LabelFrame(self.wrapperRight, height=125, borderwidth=0, highlightthickness=0)
         self.wrapperData = LabelFrame(self.wrapperRight, height=450)
-        self.wrapperAddStock = LabelFrame(self.wrapperRight, height=250, borderwidth=0, highlightthickness=0)
-        self.wrapperCompany.pack(side=TOP, fill="x", expand="no")
-        self.wrapperData.pack(fill="both", expand="yes")
-        self.wrapperAddStock.pack(side=BOTTOM, fill="both", expand="no")
+        self.wrapperAddStock = LabelFrame(self.wrapperRight, borderwidth=0, highlightthickness=0)
+        self.wrapperCompany.pack(anchor=N, side=TOP, fill="both", expand="no")
+        self.wrapperData.pack(anchor=N, fill="both", expand="yes")
+        self.wrapperAddStock.pack(anchor=N, fill="both", expand="yes")
         self.wrapperCompany.configure(bg='lightsteelblue')
         self.wrapperData.configure(bg='lightsteelblue')
         self.wrapperAddStock.configure(bg='lightsteelblue')
