@@ -22,5 +22,6 @@ CREATE TABLE historystocks (
 	name VARCHAR(255),
 	date DATE,
 	open FLOAT,
+	close FLOAT,
 	volume INT
 );

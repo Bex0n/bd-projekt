@@ -3,6 +3,7 @@ from datadownloader import *
 from csvparser import *
 from nameconverter import *
 from datetime import date
+import random
 
 # mysql -u root -p
 # haslo: root
@@ -132,14 +133,19 @@ class stockDatabase(object):
     
     def deleteOwnedStock(self, id):
         sql = "SELECT * FROM ownedstocks WHERE id = " + str(id)
-        print(sql)
         self.execute(sql)
         data = self.fetch()[0]
-        sqlinsert = "INSERT INTO historystocks (id, name, date, open, volume) VALUES (%s, %s, %s, %s, %s)"
-        val = (data[0], data[1], data[2], data[3], data[4])
+        sqlinsert = "INSERT INTO historystocks (id, name, date, open, close, volume) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (data[0], data[1], data[2], data[3], self.getLastPrice(data[1]), data[4])
         self.cursor.execute(sqlinsert, val)
         sqlremove = "DELETE FROM ownedstocks WHERE id = " + str(id)
         self.execute(sqlremove)
+        self.conn.commit()
+
+    def addOwnedStock(self, name, date, open, volume):
+        sql = "INSERT INTO ownedstocks (id, name, date, open, volume) VALUES (%s, %s, %s, %s, %s)"
+        val = (random.randrange(1e9), name, date, open, volume)
+        self.cursor.execute(sql, val)
         self.conn.commit()
     
     def getHistoryStocks(self, companyName):

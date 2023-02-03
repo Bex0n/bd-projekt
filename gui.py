@@ -13,9 +13,14 @@ def callback(eventObject):
 
 class GUITemplate(object):
 
+    def createOwnedStock(self):
+        self.database.addOwnedStock(self.choosebox.get(), self.addStockDateEntryString.get(), self.addStockPriceEntryString.get(), self.volumeBuyEntry.get())
+        self.updateVisualData()
+
     def updateVisualData(self):
         self.companyName.configure(text=self.choosebox.get())
         self.companyUpdateDate.configure(text="Last update: " + self.database.getLastDate(self.choosebox.get()))
+        self.todayPriceValue.configure(text=str(self.database.getLastPrice(self.choosebox.get())))
         self.minPriceValue.configure(text=self.database.getMin(self.choosebox.get()))
         self.maxPriceValue.configure(text=self.database.getMax(self.choosebox.get()))
         self.avgPriceValue.configure(text=self.database.getAvg(self.choosebox.get()))
@@ -24,6 +29,10 @@ class GUITemplate(object):
         self.dailyVolume.configure(text=self.database.getDailyVolume(self.choosebox.get()))
         self.lowestDailyVolume.configure(text=self.database.getLowestVolume(self.choosebox.get()))
         self.highestDailyVolume.configure(text=self.database.getHighestVolume(self.choosebox.get()))
+
+        self.addStockDateEntryString.set(self.database.getLastDate(self.choosebox.get()))
+        self.addStockPriceEntryString.set(str(self.database.getLastPrice(self.choosebox.get())))
+
         self.clearStocks()
         self.stocksInfo.forget()
         self.wrapperStocks.forget()
@@ -68,7 +77,7 @@ class GUITemplate(object):
         self.heightenator = Label(self.wrapperCompany, bg='lightsteelblue', height=3)
         self.heightenator.pack(side=LEFT)
         self.choosebox.pack(side=LEFT, fill="x", expand="yes", padx=10, pady=0)
-        self.updatebutton = Button(self.wrapperCompany, text="UPDATE", fg = "white", font=("Helvetica 18 bold", 15), bg="#5b74a3", command=self.updateData)
+        self.updatebutton = Button(self.wrapperCompany, text="Update", fg = "white", font=("Helvetica 18 bold", 15), bg="#5b74a3", command=self.updateData)
         self.updatebutton.pack(side=TOP, fill="x", expand="yes", padx=100, pady=0)
 
     def __init_right_panel_data_panel__(self):
@@ -85,9 +94,10 @@ class GUITemplate(object):
 
         self.companyUpdateDate = Label(self.companyLast, text="-", bg='white', height=2)
         self.companyUpdateDate.pack(side=LEFT, fill='both', expand="yes")
-        # self.companyLastChoosebox = Label(self.companyLast, text="-", bg="white")
-        # self.companyLastChoosebox.pack(side=LEFT, fill="both", expand="yes")
 
+        self.todayPriceText = Label(self.leftCompanyData, anchor = W)
+        self.todayPriceText.pack(anchor=NW, fill='x')
+        Label(self.todayPriceText, text='Today price:', font=("TkDefaultFont", 14), anchor=W, width=29).pack()
         self.minPriceText = Label(self.leftCompanyData, anchor = W)
         self.minPriceText.pack(anchor=NW, fill='x')
         Label(self.minPriceText, text='Minimum price:', font=("TkDefaultFont", 14), anchor=W, width=29).pack()
@@ -113,6 +123,10 @@ class GUITemplate(object):
         self.highestDailyVolumeText.pack(anchor=NW, fill='x')
         Label(self.highestDailyVolumeText, text='Highest daily Volume:', font=("TkDefaultFont", 14), anchor=W, width=29).pack()
 
+        self.todayPrice = Label(self.rightCompanyData, anchor = W, width=40)
+        self.todayPrice.pack(anchor=NW, fill='x')
+        self.todayPriceValue = Label(self.todayPrice, text='-', font=("TkDefaultFont", 14))
+        self.todayPriceValue.pack()
         self.minPrice = Label(self.rightCompanyData, anchor = W, width=40)
         self.minPrice.pack(anchor=NW, fill='x')
         self.minPriceValue = Label(self.minPrice, text='-', font=("TkDefaultFont", 14))
@@ -147,8 +161,35 @@ class GUITemplate(object):
         self.highestDailyVolume.pack()
 
     def __init_right_panel_add_stock(self):
-        self.addStock = Label(self.wrapperAddStock, anchor=W, bg='white', width=40)
+        self.addStock = Label(self.wrapperAddStock, anchor=W, bg='blue', width=40)
         self.addStock.pack(fill='both', expand='yes')
+        self.addStockLeft = Label(self.addStock, anchor=W, bg='yellow')
+        self.addStockLeft.pack(side=LEFT, fill='both', expand='yes')
+        self.addStockCenter = Label(self.addStock, anchor=W, bg='green')
+        self.addStockCenter.pack(side=LEFT, fill='both', expand='yes')
+        self.addStockRight = Label(self.addStock, anchor=W, bg='red')
+        self.addStockRight.pack(side=LEFT, fill='both', expand='yes')
+        # Add stock left panel
+        self.addStockPrice = Label(self.addStockLeft, text='Price', font=('Kokilla', 18))
+        self.addStockPrice.pack()
+        self.addStockDate = Label(self.addStockLeft, text='Start date', font=('Kokilla', 18))
+        self.addStockDate.pack()
+        # Add stock center panel
+        self.addStockPriceEntryString = StringVar()
+        self.addStockPriceEntry = Entry(self.addStockCenter, font=('Kokilla', 18), textvariable=self.addStockPriceEntryString)
+        self.addStockPriceEntry.pack()
+        self.addStockDateEntryString = StringVar()
+        self.addStockDateEntry = Entry(self.addStockCenter, font=('Kokilla', 18), textvariable=self.addStockDateEntryString)
+        self.addStockDateEntry.pack()
+        # Add stock right panel
+        self.volumeBuyTextTop = Label(self.addStockRight, text='I buy', font=('Kokilla', 25), bg='yellow')
+        self.volumeBuyTextTop.pack(anchor=N)
+        self.volumeBuyEntry = Entry(self.addStockRight)
+        self.volumeBuyEntry.pack(anchor=N)
+        self.volumeBuyTextBottom = Label(self.addStockRight, text='volumes', font=('Kokilla', 25), bg='yellow')
+        self.volumeBuyTextBottom.pack(anchor=N)
+        self.buyButton = Button(self.addStockRight, text="Confirm", command=self.createOwnedStock)
+        self.buyButton.pack(anchor=S)
 
     def __init_left_panel__(self):
         self.stocksInfo = Label(self.wrapperLeft, anchor=N, text="Owned stocks", height=1)
@@ -284,7 +325,7 @@ class GUITemplate(object):
         label.labelleft.pack(side=LEFT)
         label.labelright.pack(side=LEFT)
 
-        earning = round((self.database.getLastPrice(self.choosebox.get()) - data[3]) * data[4], 2)
+        earning = round((data[4] - data[3]) * data[5], 2)
         label.earnings = Label(label.labelright, bg='white', text=str(earning) + "$", font=('Kokilla', 16), pady=1)
         if earning > 0:
             label.earnings.configure(bg='green')
