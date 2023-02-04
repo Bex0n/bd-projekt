@@ -4,6 +4,7 @@ def parseData(company):
     for line in data:
         line = line.replace("\n", "")
         line = line.split(',')
-        output.append(line)
+        if (line[2] != 'null'):
+            output.append(line)
     output.pop(0)
     return output    

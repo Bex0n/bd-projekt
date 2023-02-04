@@ -43,13 +43,19 @@ class stockDatabase(object):
     def getLastDate(self, companyName):
         self.execute("SELECT max(date) FROM stocks WHERE name = '" + companyName + "' ORDER BY date")
         data = self.fetch()
+        if (len(data) == 0 or data[0][0] == None):
+            return '-'
         return str(data[0][0])
 
     def getLastPrice(self, companyName):
         date = self.getLastDate(companyName)
+        if (date == '-'):
+            return 0
         self.execute("SELECT close FROM stocks WHERE name = '" + companyName + "' AND date = '" + date + "'")
         data = self.fetch()
-        return data[0][0]
+        if (len(data) == 0 or data[0][0] == None):
+            return 0
+        return (data[0][0])
     
     def updateLastMonth(self, companyName):
         downloadLastMonth(convertName(companyName))
@@ -63,7 +69,7 @@ class stockDatabase(object):
         data = self.fetch()
         if (len(data) == 0 or data[0][0] == None):
             return '-'
-        return str(data[0][0]) + " on " + str(data[0][1])
+        return "{:.2f}".format(data[0][0]) + " on " + str(data[0][1])
 
     def getMax(self, companyName):
         sql = "SELECT high, date FROM stocks WHERE name = '" + companyName + "' AND date > '" + str(date.today() - relativedelta(months=1)) + "' GROUP BY high, date ORDER BY high DESC"
@@ -71,7 +77,7 @@ class stockDatabase(object):
         data = self.fetch()
         if (len(data) == 0 or data[0][0] == None):
             return '-'
-        return str(data[0][0]) + " on " + str(data[0][1])
+        return "{:.2f}".format(data[0][0]) + " on " + str(data[0][1])
 
     def getAvg(self, companyName):
         sql = "SELECT AVG((open + close) / 2) FROM stocks WHERE name = '" + companyName + "' AND date > '" + str(date.today() - relativedelta(months=1)) + "'"
@@ -79,7 +85,7 @@ class stockDatabase(object):
         data = self.fetch()
         if (len(data) == 0 or data[0][0] == None):
             return '-'
-        return str(round(data[0][0], 2))
+        return "{:.2f}".format(data[0][0])
 
     def getMedian(self, companyName):
         sql = "SELECT (open + close) / 2 FROM stocks WHERE name = '" + companyName + "' AND date > '" + str(date.today() - relativedelta(months=1)) + "' ORDER BY date"
@@ -89,9 +95,9 @@ class stockDatabase(object):
         if (len(data) == 0 or data[0][0] == None):
             return '-'
         if (size % 2 == 0 and size > 0):
-            return str(round((data[int(size / 2)][0] + data[int(size / 2 - 1)][0]) / 2, 2))
+            return "{:.2f}".format((data[int(size / 2)][0] + data[int(size / 2 - 1)][0]) / 2)
         if (size % 2 == 1):
-            return str(round(data[int(size / 2)][0], 2))
+            return "{:.2f}".format(data[int(size / 2)][0])
         return 0
 
     def getVolume(self, companyName):
@@ -127,7 +133,7 @@ class stockDatabase(object):
         return str(data[0][0]) + " on " + str(data[0][1])
 
     def getOwnedStocks(self, companyName):
-        self.execute("SELECT * FROM ownedstocks WHERE name = '" + companyName + "'")
+        self.execute("SELECT * FROM ownedstocks WHERE name = '" + companyName + "' ORDER BY date DESC")
         data = self.fetch()
         return data
     
@@ -149,7 +155,7 @@ class stockDatabase(object):
         self.conn.commit()
     
     def getHistoryStocks(self, companyName):
-        self.execute("SELECT * FROM historystocks WHERE name = '" + companyName + "'")
+        self.execute("SELECT * FROM historystocks WHERE name = '" + companyName + "' ORDER BY date DESC")
         data = self.fetch()
         return data
 
